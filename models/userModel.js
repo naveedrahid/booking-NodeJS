@@ -6,8 +6,8 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Name is required'],
         trim: true,
-        minLenght: [3, 'Name must be at least 3 characters'],
-        maxLenght: [50, 'Name must be less than 50 characters']
+        minLength: [3, 'Name must be at least 3 characters'],
+        maxLength: [50, 'Name must be less than 50 characters']
     },
     email: {
         type: String,
@@ -19,8 +19,8 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Password is required'],
-        minLenght: [6, 'Password must be at least 6 characters'],
-        maxLenght: [20, 'Password must be less than 20 characters'],
+        minLength: [6, 'Password must be at least 6 characters'],
+        maxLength: [20, 'Password must be less than 20 characters'],
         select: false
     },
     role_id: {
@@ -28,37 +28,23 @@ const userSchema = new mongoose.Schema({
         ref: 'Role',
         required: [true, 'Role ID is required']
     },
-    is_valid_email: {
-        type: Boolean,
-        default: false
-    },
-    verify_token: {
-        type: String,
-        default: null
-    },
-    reset_token: {
-        type: String,
-        default: null
-    },
-    is_deleted: {
-        type: Boolean,
-        default: false
-    },
-    deleted_at: {
-        type: Date,
-        default: null
-    }
-
+    is_valid_email: { type: Boolean, default: false },
+    verify_token: { type: String, default: null },
+    reset_token: { type: String, default: null },
+    is_deleted: { type: Boolean, default: false },
+    deleted_at: { type: Date, default: null }
 }, {
     timestamps: true,
 });
 
 userSchema.pre('save', async function (next) {
+    // Only hash the password if it has been modified or it's a new user
     if (!this.isModified('password')) return next();
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
 });
+
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
